@@ -4,6 +4,7 @@ import numpy as np
 import math
 import random
 from collections import deque
+from fsm import fsmRunner
 
 img = cv2.imread("patch.jpg", cv2.IMREAD_ANYCOLOR)
 codels = [0, 1, 2, 3, 4, 5, 6, 7]
@@ -98,6 +99,7 @@ def main():
     codes_deque = assembleCodesDeque(left_values, edgepercodel, right_values, 5, (378 * 63) / 100, 5)
 
     print(codes_deque)
+    fsmRunner(codes_deque)
 
 
 
