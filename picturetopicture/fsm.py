@@ -59,47 +59,51 @@ def fsmRunner(codes_deque):
     while True:
         match state:
             case 0:
-                region = base3(codes_deque.popleft())
-                print("On " + str(region) + " / 27 of the image, ")
+                region = base3(codes_deque.popleft())      
                 if codes_deque:
                     state = init_dict[codes_deque.popleft()]
                 else:
-                    state = -1
+                    break
+
+                print("On " + str(region) + " / 27 of the image, ")
             case 1:
                 print("print the three digit codes.")
-                state = 0
+                state = -1
             case 2:
                 print("print the code sentences.")
-                state = 0
+                state = -1
             case 3:
                 print("print a snipet of the python code.")
-                state = 0
+                state = -1
             case 4:
                 print("randomly sort the pixels.")
-                state = 0
+                state = -1
             case 5:
                 print("sort the pixels.")
-                state = 0
+                state = -1
             case 6:
                 print("print the hexadecimal data.")
-                state = 0
+                state = -1
             case 7:
                 print("threshold the image.")
-                state = 0
+                state = -1
             case 8:
                 print("create an image that is identical to the interpreter.")
-                state = 0
+                state = -1
             case 9:
                 print("create a fractal pattern.")
-                state = 0
+                state = -1
             case 10:
                 print("Print a statement")
-                state = 0
+                state = -1
             case 11:
                 print("Apply Canny Edge Detection.")
-                state = 0
+                state = -1
             case -1:
-                break
+                print("")
+                state = 0
+
+            
 
 
 

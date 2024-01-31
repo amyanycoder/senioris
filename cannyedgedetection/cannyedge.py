@@ -116,6 +116,7 @@ def edge_values(codels):
             for x in range(0, 63):
                 #checks to see if the current pixel is not black
                 if(codels[z][x,y] != 0):
+                    print(str(x) + ", " + str(y))
                     q += 1
         edgepercodel[z] = q
 
