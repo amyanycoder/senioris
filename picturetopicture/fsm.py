@@ -1,9 +1,14 @@
 #from statemachine import StateMachine, State
 from collections import deque
+import cv2
+import manip
 
-def fsmRunner(codes_deque):
+def fsmRunner(codes_deque, img):
+    region = 0
     state = 0
     prev_state = -1
+    subimage_deque = deque()
+    merg_img = img
 
     init_dict = {
         (0,0,0): 1,
@@ -59,13 +64,15 @@ def fsmRunner(codes_deque):
     while True:
         match state:
             case 0:
-                region = base3(codes_deque.popleft())      
+                #region = base3(codes_deque.popleft())
+                region = codes_deque.popleft()
+                region_code = RegionCodeGetter(region)  
                 if codes_deque:
-                    state = init_dict[codes_deque.popleft()]
+                    state = init_dict[codes_deque.popleft()[0]]
                 else:
                     break
 
-                print("On " + str(region) + " / 27 of the image, ")
+                print("On " + str(region_code) + " / 27 of the image, ")
             case 1:
                 print("print the three digit codes.")
                 state = -1
@@ -98,14 +105,21 @@ def fsmRunner(codes_deque):
                 state = -1
             case 11:
                 print("Apply Canny Edge Detection.")
+                merge_img = manip.CannyApplier(img, region)
                 state = -1
             case -1:
                 print("")
                 state = 0
 
+    return merge_img
             
 
+#Converts the region code and turns it into a whole number of pixels 
+def FractionToRegion(height, region_code):
+    return int(height * round(region_code / 27, 2))
 
+def RegionCodeGetter(region):
+    return base3(region[0]) 
 
 #converts a base3 series of digits into an integer
 def base3(tuple):

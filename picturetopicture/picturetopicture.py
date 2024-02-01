@@ -55,7 +55,7 @@ def right_valuer(codels_list, width):
     for z in range (0, len(codels_list)):
         for x in range(0,width):
             for y in range(0, codel_height):
-                rx = 377 - x
+                rx = (width - 1) - x
                 if(codels_list[z][y,rx] != 0):
                     rightmost_codel_list[z] = rx
                     break
@@ -85,9 +85,9 @@ def edge_valuer(codels_list, width):
 def assembleCodesDeque(left_list, total_list, right_list, threshold_left, threshold_total, threshold_right):
     codes_deque = deque()
     for i in range(1, len(total_list)):
-        #appends a code in the form of a tuple to the end of the deque
-        codes_deque.append((difference_code(left_list[i - 1], left_list[i], threshold_left), difference_code(total_list[i - 1], total_list[i], threshold_total), 
-                            difference_code(right_list[i - 1], right_list[i], threshold_right)))
+        #A two value tuple:  The first value is the three digits of the code as a tuple.  The second value is the number the code was added.
+        codes_deque.append(((difference_code(left_list[i - 1], left_list[i], threshold_left), difference_code(total_list[i - 1], total_list[i], threshold_total), 
+                            difference_code(right_list[i - 1], right_list[i], threshold_right)), i - 1))
     
     return codes_deque
 
@@ -120,15 +120,18 @@ def main():
         cv2.waitKey(0)
         i += 1
 
+    #creates array of left, middle, and right digits
     edgepercodel = edge_valuer(codels_list, width)
     left_values = left_valuer(codels_list, width)
     right_values = right_valuer(codels_list, width)
 
+    #combines digits into three digit codes
     codes_deque = assembleCodesDeque(left_values, edgepercodel, right_values, width * 0.1, (width * codel_height) / 100, width * 0.1)
 
     print(codes_deque)
-    fsmRunner(codes_deque)
-
+    final_img = fsmRunner(codes_deque, img)
+    cv2.imshow("Final Image", final_img)
+    cv2.waitKey(0)
 
 
 if __name__ == "__main__":
