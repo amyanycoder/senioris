@@ -34,7 +34,7 @@ def left_valuer(codels_list, width):
             for y in range(0, codel_height):
                 #checks to see if the current pixel is not black
                 if(codels_list[z][y,x] != 0):
-                    leftmost_codel_list[z] = x
+                    leftmost_codel_list[z] = width - x
 
                     break
             else:

@@ -8,7 +8,26 @@ def fsmRunner(codes_deque, img):
     state = 0
     prev_state = -1
     subimage_deque = deque()
-    merg_img = img
+    merge_img = img
+
+    '''
+    Legend:
+    [Integer] [State]
+    0          Start
+    1          Code
+    2          Statement
+    3          Python
+    4          Random
+    5          Sort
+    6          JPEG
+    7          Threshold
+    8          Functional Sort
+    9          Fractal
+    10         Print
+    11         Canny
+    -1         End
+
+    '''
 
     init_dict = {
         (0,0,0): 1,
@@ -42,31 +61,15 @@ def fsmRunner(codes_deque, img):
 
     }
 
-    '''
-    Legend:
-    [Integer] [State]
-    0          Start
-    1          Code
-    2          Statement
-    3          Python
-    4          Random
-    5          Sort
-    6          JPEG
-    7          Threshold
-    8          Functional Sort
-    9          Fractal
-    10         Print
-    11         Canny
-    -1         End
-
-    '''
-
     while True:
         match state:
             case 0:
-                #region = base3(codes_deque.popleft())
+                #checks if there are any codes in the queue before pulling from it
+                if(len(codes_deque) == 0):
+                    break
+
                 region = codes_deque.popleft()
-                region_code = RegionCodeGetter(region)  
+                region_code = RegionCodeGetter(region) + 1
                 if codes_deque:
                     state = init_dict[codes_deque.popleft()[0]]
                 else:
@@ -93,6 +96,19 @@ def fsmRunner(codes_deque, img):
                 state = -1
             case 7:
                 print("threshold the image.")
+                if (len(codes_deque) == 0):
+                    break
+                
+                thresh_code = codes_deque.pop()[0]
+
+                thresh_type = cv2.THRESH_BINARY
+                if (thresh_code[0] == 1):
+                    thresh_type = cv2.THRESH_BINARY_INV
+                if (thresh_code[0] == 2):
+                    thresh_type = cv2.THRESH_TOZERO
+
+                thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
+                merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value)
                 state = -1
             case 8:
                 print("create an image that is identical to the interpreter.")
@@ -101,14 +117,14 @@ def fsmRunner(codes_deque, img):
                 print("create a fractal pattern.")
                 state = -1
             case 10:
-                print("Print a statement")
+                print("Print a statement.")
                 state = -1
             case 11:
                 print("Apply Canny Edge Detection.")
                 merge_img = manip.CannyApplier(img, region)
                 state = -1
             case -1:
-                print("")
+                print("Skip Section.")
                 state = 0
 
     return merge_img
@@ -131,77 +147,3 @@ def base3(tuple):
         place -= 1
     return int_value 
 
-
-'''
-#the finite state machine that runs through the code
-class CodesStateMachine(codes_deque):
-    #The States
-    START_S = State(initial=True)
-    Code_S = State()
-    State_S = State()
-    Python_S = State()
-    Rand_S = State()
-    Sort_S = State()
-    JPEG_S = State()
-    Thresh_S = State()
-    Funct_S = State()
-    Fractal_S = State()
-    Print_S = State()
-    Char_S = State()
-    Canny_S = State()
-    END_S = State(final=True)
-
-    #Transitions
-    #Transitions from Start_S to a Procedure State
-    Code_Init = Start_S.to(Code_S)
-    State_Init = Start_S.to(State_S)
-    Python_Init = Start_S.to(Python_S)
-    Rand_Init = Start_S.to(Rand_S)
-    Sort_Init = Start_S.to(Sort_S)
-    JPEG_Init = Start_S.to(JPEG_S)
-    Thresh_Init = Start_S.to(Thresh_S)
-    Funct_Init = Start_S.to(Funct_S)
-    Fractal_Init = Start_S.to(Fractal_S)
-    Print_Init = Start_S.to(Print_S)
-    Canny_Init = Start_S.to(Canny_S)
-    #Since nothing occurs at the Skip state, returns to START_S
-    Skip_Init = Start_S.to.itself()
-
-    #Transitions from a Procedure State to Start_S
-    Code_Reset = Code_S.to(START_S)
-    State_Reset = State_S.to(START_S)
-    Python_Reset = Python_S.to(START_S)
-    Rand_Reset = Rand_S.to(START_S)
-    Sort_Reset = Sort_S.to(START_S)
-    JPEG_Reset = JPEG_S.to(START_S)
-    Thresh_Reset = Thresh_S.to(START_S)
-    Funct_Reset = Funct_S.to(START_S)
-    Fractal_Reset = Fractal_S.to(START_S)
-    Print_Reset = Prnt_S.to(START_S)
-    Char_Reset = Char_S.to(START_S)
-    Canny_Reset = Canny_S.to(START_S)
-
-    #Transitions to Char_S (for building a string)
-    Char_Init = Print_S.to(Char_S)
-    Char_Cycle = Char_S.to.itself()
-
-    #Transitions to END_S
-    End_Init = START_S.to(END_S)
-    End_Code = Code_S.to(END_S)
-    End_Python = Python_S.to(END_S)
-    End_Rand = Rand_S.to(END_S)
-    End_Sort = Sort_S.to(END_S)
-    End_JPEG = JPEG_S.to(END_S)
-    End_Thresh = Thresh_S.to(END_S)
-    End_Funct = Funct_S.to(END_S)
-    End_Fractal = Fractal_S.to(END_S)
-    End_Print = Print_S.to(END_S)
-    End_Char =  Char_S.to(END_S)
-    End_Canny = Canny_S.to(END_S)
-
-
-
-
-    def __init__(self):
-        self.statement = ""
-'''

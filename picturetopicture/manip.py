@@ -17,6 +17,21 @@ def CannyApplier(img, region):
 
     return ImageMerger(img, canny_region, width, pixel_height, region[1])
 
+#Applies a Threshold to a subregion of the image
+def ThreshApplier(img, region, thresh_type, thresh_value):
+    height, width, channels = img.shape
+
+    #the percentage of the image to be thresholded, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+
+    #defines a region, then thresholds it
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    thresh_region = cv2.threshold(subregion, thresh_value, 255, thresh_type)[1]
+    cv2.imshow("thresh", thresh_region)
+    cv2.waitKey(0)
+
+    return ImageMerger(img, thresh_region, width, pixel_height, region[1])
 
 #Merges the altered subregion with the source code image
 def ImageMerger(img, subregion, width, s_height, start_pixel):
