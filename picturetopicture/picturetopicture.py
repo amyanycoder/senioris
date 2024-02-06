@@ -132,6 +132,7 @@ def main():
     final_img = fsmRunner(codes_deque, img)
     cv2.imshow("Final Image", final_img)
     cv2.waitKey(0)
+    cv2.imwrite("test.jpg", final_img)
 
 
 if __name__ == "__main__":

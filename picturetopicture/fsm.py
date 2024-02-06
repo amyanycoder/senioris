@@ -14,7 +14,7 @@ def fsmRunner(codes_deque, img):
     Legend:
     [Integer] [State]
     0          Start
-    1          Code
+    1          3 Digit Code
     2          Statement
     3          Python
     4          Random
@@ -58,7 +58,6 @@ def fsmRunner(codes_deque, img):
         (2,2,1): 9,
         (2,2,2): -1
 
-
     }
 
     while True:
@@ -70,14 +69,21 @@ def fsmRunner(codes_deque, img):
 
                 region = codes_deque.popleft()
                 region_code = RegionCodeGetter(region) + 1
+                #keeps running through the fsm as long as there are codes still in the deque.
                 if codes_deque:
-                    state = init_dict[codes_deque.popleft()[0]]
+                    state_holder = codes_deque.popleft()
+                    state = init_dict[state_holder[0]]
                 else:
                     break
+
+                    
 
                 print("On " + str(region_code) + " / 27 of the image, ")
             case 1:
                 print("print the three digit codes.")
+
+                merge_img = manip.ThreeApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
+
                 state = -1
             case 2:
                 print("print the code sentences.")
@@ -147,3 +153,6 @@ def base3(tuple):
         place -= 1
     return int_value 
 
+#converts a three digit code into a string
+def codeToString(code):
+    return str(code[0]) + str(code[1]) + str(code[2])
