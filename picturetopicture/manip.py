@@ -1,3 +1,4 @@
+from collections import deque
 import cv2
 import fsm
 
@@ -39,38 +40,78 @@ def ThreeApplier(img, region, state_holder, properties, codes_deque):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-
     subregion = img[region[1]*codel_height:pixel_height, 0:width]
 
-    #picks the font from the first digit in the property code
-    font = FontPicker(properties[0][0])
-    #picks the color from the second digit in the property code
-    color = FontColorPicker(properties[0][1], subregion)
-    #picks the font size from the third digit in the property code
-    font_size = FontSizePicker(properties[0][2], width)
-    #picks the offset from the third digit in the function code
+    text_properties = GetTextProperties(properties[0], subregion, width)
     
 
-    print(cv2.getTextSize(str(region[0]), font, font_size, 1)[0][0] * 0.5)
-
     #prints the three essential codes for this statement:  The region code, the function code, and the properties code.
-    subregion = cv2.putText(subregion, fsm.codeToString(region[0]), OffsetPicker(state_holder[0][2], region[0], font, font_size, width, region[1] + 1), font, font_size, color)
-    subregion = cv2.putText(subregion, fsm.codeToString(state_holder[0]), OffsetPicker(state_holder[0][2], state_holder[0], font, font_size, width, state_holder[1] + 1), font, font_size, color)
-    subregion = cv2.putText(subregion, fsm.codeToString(properties[0]), OffsetPicker(state_holder[0][2], properties[0], font, font_size, width, properties[1] + 1), font, font_size, color)
+    subregion = cv2.putText(subregion, fsm.codeToString(region[0]), OffsetPicker(state_holder[0][2], region[0], text_properties[0], text_properties[2], width, region[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
+    subregion = cv2.putText(subregion, fsm.codeToString(state_holder[0]), OffsetPicker(state_holder[0][2], state_holder[0], text_properties[0], text_properties[2], width, state_holder[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
+    subregion = cv2.putText(subregion, fsm.codeToString(properties[0]), OffsetPicker(state_holder[0][2], properties[0], text_properties[0], text_properties[2], width, properties[1] + 1), 0, text_properties[0], text_properties[2], text_properties[1])
     
     #prints all other codes remaining in the deque.
     for x in codes_deque:
-        subregion = cv2.putText(img, fsm.codeToString(x[0]), OffsetPicker(state_holder[0][2], x[0], font, font_size, width, x[1] + 1), font, font_size, color)
+        subregion = cv2.putText(subregion, fsm.codeToString(x[0]), OffsetPicker(state_holder[0][2], x[0], text_properties[0], text_properties[2], width, x[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
 
-    return subregion
-    #ImageMerger(img, subregion, width, pixel_height, region[1])
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
 
+
+def SentenceApplier(img, region, sentence, state_holder, properties):
+    height, width, channels = img.shape
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+
+    text_properties = GetTextProperties(properties[0], subregion, width)
+
+    #breaks up code sentence so that they all text fits on the image
+    (text_width, text_height), _ = cv2.getTextSize(sentence, text_properties[0], text_properties[2], 1)
+    line_width = text_width
+    lines = 1
+    lines_deque = deque()
+
+    while line_width > width:
+        lines += 1
+        line_width = int(text_width / lines)
+
+    line_chars = int(len(sentence) / lines)
+
+    i = 0
+    while i < lines:
+        lines_deque.append(sentence[i * line_chars : (i + 1) * line_chars]) 
+        i += 1
+
+
+    #prints the code sentence (up to this point) at the top of the subregion
+    i = 0
+    while len(lines_deque) > 0:
+        current = lines_deque.popleft()
+        subregion = cv2.putText(subregion, current, OffsetPicker(state_holder[0][2], current, text_properties[0], text_properties[2], width, region[1] + 1, i * text_height + i * int(text_height * .2)), text_properties[0], text_properties[2], text_properties[1])
+        i += 1
+
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
+
+
+#returns font, font_size, and color in a tuple
+def GetTextProperties(properties_code, subregion, width):
+    #picks the font from the first digit in the property code
+    font = FontPicker(properties_code[0])
+    #picks the color from the second digit in the property code
+    font_color = FontColorPicker(properties_code[1], subregion)
+    #picks the font size from the third digit in the property code
+    font_size = FontSizePicker(properties_code[2], width)
+
+    return (font, font_color, font_size)
 
 
 #Merges the altered subregion with the source code image
 def ImageMerger(img, subregion, width, s_height, start_pixel):
+    crop = subregion[start_pixel*codel_height:s_height, 0:width]  
 
-    img[start_pixel*codel_height:s_height, 0:width] = subregion
+    img[start_pixel*codel_height:s_height, 0:width] = crop
     return img
 
 
@@ -97,6 +138,7 @@ def FontColorPicker(digit, subregion):
     else:
         return (0, 0, 0)
 
+
 #picks a factor by which to multiply the font size by based on the third digit of the three digit proceedure code
 def FontSizePicker(digit, width):
     factor = 0.0
@@ -112,12 +154,12 @@ def FontSizePicker(digit, width):
     
     return width / (200 / factor)
 
+
 #sets an offset for the text, setting a consistent offset vertically and a left, center, or right orientation based on the function code.
 #right and center align currently slightly off
-def OffsetPicker(digit, text, font, font_size, width, codel):
+def OffsetPicker(digit, text, font, font_size, width, codel, vert_offset):
     text_bounds, baseline = cv2.getTextSize((str(text)), font, font_size, 1)
-    print(text_bounds)
-    print(baseline)
+
     horizontal_offset = 0
     #centered image
     if(digit == 1):
@@ -129,7 +171,7 @@ def OffsetPicker(digit, text, font, font_size, width, codel):
     else: 
         horizontal_offset = 10
 
-    vertical_offset = codel * codel_height - int((text_bounds[1]) * 0.5)
+    vertical_offset = codel * codel_height - int((text_bounds[1]) * 0.5) + vert_offset
 
     return (horizontal_offset, vertical_offset)
 

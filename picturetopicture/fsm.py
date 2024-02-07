@@ -9,6 +9,7 @@ def fsmRunner(codes_deque, img):
     prev_state = -1
     subimage_deque = deque()
     merge_img = img
+    code_sentence = ""
 
     '''
     Legend:
@@ -78,30 +79,33 @@ def fsmRunner(codes_deque, img):
 
                     
 
-                print("On " + str(region_code) + " / 27 of the image, ")
+                code_sentence += ("On " + str(region_code) + " / 27 of the image, ")
             case 1:
-                print("print the three digit codes.")
+                code_sentence += ("print the three digit codes.\n")
 
                 merge_img = manip.ThreeApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
 
-                state = -1
+                state = 0
             case 2:
-                print("print the code sentences.")
-                state = -1
+                code_sentence += ("print the code sentences.\n")
+
+                merge_img = manip.SentenceApplier(img, region, code_sentence, state_holder, codes_deque.popleft())
+
+                state = 0
             case 3:
-                print("print a snipet of the python code.")
-                state = -1
+                code_sentence += ("print a snipet of the python code.\n")
+                state = 0
             case 4:
-                print("randomly sort the pixels.")
-                state = -1
+                code_sentence += ("randomly sort the pixels.\n")
+                state = 0
             case 5:
-                print("sort the pixels.")
-                state = -1
+                code_sentence += ("sort the pixels.\n")
+                state = 0
             case 6:
-                print("print the hexadecimal data.")
-                state = -1
+                code_sentence += ("print the hexadecimal data.\n")
+                state = 0
             case 7:
-                print("threshold the image.")
+                code_sentence += ("threshold the image.\n")
                 if (len(codes_deque) == 0):
                     break
                 
@@ -115,24 +119,24 @@ def fsmRunner(codes_deque, img):
 
                 thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
                 merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value)
-                state = -1
-            case 8:
-                print("create an image that is identical to the interpreter.")
-                state = -1
-            case 9:
-                print("create a fractal pattern.")
-                state = -1
-            case 10:
-                print("Print a statement.")
-                state = -1
-            case 11:
-                print("Apply Canny Edge Detection.")
-                merge_img = manip.CannyApplier(img, region)
-                state = -1
-            case -1:
-                print("Skip Section.")
                 state = 0
-
+            case 8:
+                code_sentence += ("create an image that is identical to the interpreter.\n")
+                state = 0
+            case 9:
+                code_sentence += ("create a fractal pattern.\n")
+                state = 0
+            case 10:
+                code_sentence += ("print a statement.\n")
+                state = 0
+            case 11:
+                code_sentence += ("apply Canny Edge Detection.\n")
+                merge_img = manip.CannyApplier(img, region)
+                state = 0
+            case -1:
+                code_sentence += ("skip section.\n")
+                state = 0
+    print(code_sentence)
     return merge_img
             
 
