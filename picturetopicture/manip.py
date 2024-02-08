@@ -19,16 +19,25 @@ def CannyApplier(img, region):
     return ImageMerger(img, canny_region, width, pixel_height, region[1])
 
 #Applies a Threshold to a subregion of the image
-def ThreshApplier(img, region, thresh_type, thresh_value):
+def ThreshApplier(img, region, thresh_type, thresh_value, grey):
     height, width, channels = img.shape
+
 
     #the percentage of the image to be thresholded, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
 
-    #defines a region, then thresholds it
+    #defines a region, grayscales the image if necessary, then thresholds it
     subregion = img[region[1]*codel_height:pixel_height, 0:width]
+
+    if grey == True:
+        subregion = cv2.cvtColor(subregion, cv2.COLOR_RGB2GRAY)
+        subregion = cv2.cvtColor(subregion, cv2.COLOR_GRAY2RGB)
+
     thresh_region = cv2.threshold(subregion, thresh_value, 255, thresh_type)[1]
+
+
+
 
     return ImageMerger(img, thresh_region, width, pixel_height, region[1])
 
@@ -48,7 +57,7 @@ def ThreeApplier(img, region, state_holder, properties, codes_deque):
     #prints the three essential codes for this statement:  The region code, the function code, and the properties code.
     subregion = cv2.putText(subregion, fsm.codeToString(region[0]), OffsetPicker(state_holder[0][2], region[0], text_properties[0], text_properties[2], width, region[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
     subregion = cv2.putText(subregion, fsm.codeToString(state_holder[0]), OffsetPicker(state_holder[0][2], state_holder[0], text_properties[0], text_properties[2], width, state_holder[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
-    subregion = cv2.putText(subregion, fsm.codeToString(properties[0]), OffsetPicker(state_holder[0][2], properties[0], text_properties[0], text_properties[2], width, properties[1] + 1), 0, text_properties[0], text_properties[2], text_properties[1])
+    subregion = cv2.putText(subregion, fsm.codeToString(properties[0]), OffsetPicker(state_holder[0][2], properties[0], text_properties[0], text_properties[2], width, properties[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
     
     #prints all other codes remaining in the deque.
     for x in codes_deque:
@@ -64,6 +73,8 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
     subregion = img[region[1]*codel_height:pixel_height, 0:width]
+
+    sentence = sentence.replace("\n", "")
 
     text_properties = GetTextProperties(properties[0], subregion, width)
 
@@ -91,6 +102,32 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
         current = lines_deque.popleft()
         subregion = cv2.putText(subregion, current, OffsetPicker(state_holder[0][2], current, text_properties[0], text_properties[2], width, region[1] + 1, i * text_height + i * int(text_height * .2)), text_properties[0], text_properties[2], text_properties[1])
         i += 1
+
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
+
+
+
+def PrintApplier(img, region, state_holder, properties, codes_deque):
+    height, width, channels = img.shape
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    text_properties = GetTextProperties(properties[0], subregion, width)
+
+    #runs through the codes deque and generates a phrase by converting to unicode
+    statement = ""
+    for x in codes_deque:
+        if fsm.base3(x[0]) == 0:
+            break
+
+        char = chr(fsm.base3(x[0]) + 64)
+        statement += char
+
+    print(statement)
+
+    subregion = cv2.putText(subregion, statement, OffsetPicker(state_holder[0][2], statement, text_properties[0], text_properties[2], width, 0, 100), text_properties[0], text_properties[2], text_properties[1])
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
@@ -144,13 +181,13 @@ def FontSizePicker(digit, width):
     factor = 0.0
     #small image
     if(digit == 0):
-        factor = 0.5
+        factor = 0.25
     #medium image
     elif(digit == 1):
-        factor = 1
+        factor = 0.5
     #large image
     else: 
-        factor = 1.5
+        factor = 1
     
     return width / (200 / factor)
 

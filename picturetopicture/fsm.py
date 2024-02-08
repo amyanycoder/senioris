@@ -22,7 +22,7 @@ def fsmRunner(codes_deque, img):
     5          Sort
     6          JPEG
     7          Threshold
-    8          Functional Sort
+    8          Grayscale Threshold
     9          Fractal
     10         Print
     11         Canny
@@ -77,8 +77,6 @@ def fsmRunner(codes_deque, img):
                 else:
                     break
 
-                    
-
                 code_sentence += ("On " + str(region_code) + " / 27 of the image, ")
             case 1:
                 code_sentence += ("print the three digit codes.\n")
@@ -105,7 +103,24 @@ def fsmRunner(codes_deque, img):
                 code_sentence += ("print the hexadecimal data.\n")
                 state = 0
             case 7:
-                code_sentence += ("threshold the image.\n")
+                code_sentence += ("threshold the image (color).\n")
+                if (len(codes_deque) == 0):
+                    break
+                
+
+                thresh_code = codes_deque.pop()[0]
+
+                thresh_type = cv2.THRESH_BINARY
+                if (thresh_code[0] == 1):
+                    thresh_type = cv2.THRESH_BINARY_INV
+                if (thresh_code[0] == 2):
+                    thresh_type = cv2.THRESH_TOZERO
+
+                thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
+                merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value, False)
+                state = 0
+            case 8:
+                code_sentence += ("threshold the image (grayscale).\n")
                 if (len(codes_deque) == 0):
                     break
                 
@@ -118,16 +133,21 @@ def fsmRunner(codes_deque, img):
                     thresh_type = cv2.THRESH_TOZERO
 
                 thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
-                merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value)
-                state = 0
-            case 8:
-                code_sentence += ("create an image that is identical to the interpreter.\n")
+                merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value, True)
                 state = 0
             case 9:
                 code_sentence += ("create a fractal pattern.\n")
                 state = 0
             case 10:
                 code_sentence += ("print a statement.\n")
+                merge_img = manip.PrintApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
+                print("I survived I guess?")
+
+                #removes codes from the queue to match up with the iteration in manip.py
+                while codes_deque:
+                    if base3(codes_deque.popleft()[0]) == 0:
+                        break
+
                 state = 0
             case 11:
                 code_sentence += ("apply Canny Edge Detection.\n")

@@ -42,6 +42,7 @@ def left_valuer(codels_list, width):
                 
             break
 
+
     #defines a threshold for comparison between codels, based on a fraction of the total number of pixels in the codel.
     return(leftmost_codel_list)
 
@@ -78,6 +79,7 @@ def edge_valuer(codels_list, width):
                 #checks to see if the current pixel is not black.  If so, add it to q, the pixel counter
                 if(codels_list[i][x,y] != 0):
                     q += 1
+        print(q)
         edgepercodel.append(q)
 
     return edgepercodel
