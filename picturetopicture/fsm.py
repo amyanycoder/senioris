@@ -92,6 +92,15 @@ def fsmRunner(codes_deque, img):
                 state = 0
             case 3:
                 code_sentence += ("print a snipet of the python code.\n")
+
+                file = "manip.py"
+                if(state_holder[0][2] == 0):
+                    file = "picturetopicture.py"
+                elif(state_holder[0][2] == 1):
+                    file = "fsm.py"
+
+                merge_img = manip.PythonApplier(img, region, state_holder, codes_deque.popleft(), file)
+
                 state = 0
             case 4:
                 code_sentence += ("randomly sort the pixels.\n")
@@ -141,7 +150,6 @@ def fsmRunner(codes_deque, img):
             case 10:
                 code_sentence += ("print a statement.\n")
                 merge_img = manip.PrintApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
-                print("I survived I guess?")
 
                 #removes codes from the queue to match up with the iteration in manip.py
                 while codes_deque:

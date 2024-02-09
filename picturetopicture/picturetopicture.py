@@ -79,7 +79,6 @@ def edge_valuer(codels_list, width):
                 #checks to see if the current pixel is not black.  If so, add it to q, the pixel counter
                 if(codels_list[i][x,y] != 0):
                     q += 1
-        print(q)
         edgepercodel.append(q)
 
     return edgepercodel

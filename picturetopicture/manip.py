@@ -106,7 +106,6 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
 
-
 def PrintApplier(img, region, state_holder, properties, codes_deque):
     height, width, channels = img.shape
 
@@ -115,6 +114,7 @@ def PrintApplier(img, region, state_holder, properties, codes_deque):
     pixel_height = fsm.FractionToRegion(height, region_code)
     subregion = img[region[1]*codel_height:pixel_height, 0:width]
     text_properties = GetTextProperties(properties[0], subregion, width)
+    
 
     #runs through the codes deque and generates a phrase by converting to unicode
     statement = ""
@@ -125,9 +125,36 @@ def PrintApplier(img, region, state_holder, properties, codes_deque):
         char = chr(fsm.base3(x[0]) + 64)
         statement += char
 
-    print(statement)
-
     subregion = cv2.putText(subregion, statement, OffsetPicker(state_holder[0][2], statement, text_properties[0], text_properties[2], width, 0, 100), text_properties[0], text_properties[2], text_properties[1])
+
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
+
+
+def PythonApplier(img, region, state_holder, properties, file):
+    height, width, channels = img.shape
+
+    py = open(file, "r")
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    text_properties = GetTextProperties(properties[0], subregion, width)
+
+
+    lines = py.read().split("\n")
+    #chooses starting index based on the first digit of the properties code.
+    start = int(properties[0][0] / 3 * len(lines))
+    lines = lines[start:len(lines) - 1]
+
+
+    (text_width, text_height), _ = cv2.getTextSize(lines[0], text_properties[0], text_properties[2], 1)
+
+
+    for x in lines:
+        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1])
+
+    py.close()
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
