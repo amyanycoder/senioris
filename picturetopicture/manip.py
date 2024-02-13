@@ -141,14 +141,43 @@ def PythonApplier(img, region, state_holder, properties, file):
     subregion = img[region[1]*codel_height:pixel_height, 0:width]
     text_properties = GetTextProperties(properties[0], subregion, width)
 
-
     lines = py.read().split("\n")
+
     #chooses starting index based on the first digit of the properties code.
     start = int(properties[0][0] / 3 * len(lines))
     lines = lines[start:len(lines) - 1]
 
 
     (text_width, text_height), _ = cv2.getTextSize(lines[0], text_properties[0], text_properties[2], 1)
+
+
+    for x in lines:
+        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1])
+
+    py.close()
+
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
+
+
+def HexApplier(img, region, state_holder, properties, file):
+    height, width, channels = img.shape
+
+    py = open(file, "rb")
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    text_properties = GetTextProperties(properties[0], subregion, width)
+
+    lines = str(py.read()).split("\n")
+
+    #chooses starting index based on the first digit of the properties code.
+    start = int(properties[0][0] / 3 * len(lines))
+    lines = lines[start:len(lines) - 1]
+
+
+    (text_width, text_height), _ = cv2.getTextSize("hello", text_properties[0], text_properties[2], 1)
 
 
     for x in lines:

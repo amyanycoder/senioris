@@ -130,7 +130,7 @@ def main():
     codes_deque = assembleCodesDeque(left_values, edgepercodel, right_values, width * 0.1, (width * codel_height) / 100, width * 0.1)
 
     print(codes_deque)
-    final_img = fsmRunner(codes_deque, img)
+    final_img = fsmRunner(codes_deque, img, sys.argv[1])
     cv2.imshow("Final Image", final_img)
     cv2.waitKey(0)
     cv2.imwrite("test.jpg", final_img)

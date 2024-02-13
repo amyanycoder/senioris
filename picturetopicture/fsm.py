@@ -3,7 +3,7 @@ from collections import deque
 import cv2
 import manip
 
-def fsmRunner(codes_deque, img):
+def fsmRunner(codes_deque, img, img_name):
     region = 0
     state = 0
     prev_state = -1
@@ -110,6 +110,8 @@ def fsmRunner(codes_deque, img):
                 state = 0
             case 6:
                 code_sentence += ("print the hexadecimal data.\n")
+                merge_img = manip.HexApplier(img, region, state_holder, codes_deque.popleft(), img_name)
+
                 state = 0
             case 7:
                 code_sentence += ("threshold the image (color).\n")
