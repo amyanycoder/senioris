@@ -46,17 +46,17 @@ def fsmRunner(codes_deque, img, img_name):
         (1,1,0): 7,
         (1,1,1): 8,
         (1,1,2): 11,
-        (1,2,0): 10,
-        (1,2,1): 10,
-        (1,2,2): 10,
+        (1,2,0): 5,
+        (1,2,1): 5,
+        (1,2,2): 5,
         (2,0,0): 5,
         (2,0,1): 5,
         (2,0,2): 5,
         (2,1,0): 5,
         (2,1,1): 5,
-        (2,1,2): 5,
-        (2,2,0): 5,
-        (2,2,1): 5,
+        (2,1,2): 10,
+        (2,2,0): 10,
+        (2,2,1): 10,
         (2,2,2): -1
 
     }
@@ -76,6 +76,10 @@ def fsmRunner(codes_deque, img, img_name):
                     state = init_dict[state_holder[0]]
                 else:
                     break
+                
+                #leaves the fsm if the deque doesn't have enough codes for the next statement
+                if(len(codes_deque) == 0 and (base3(state_holder[0]) != 26 and (base3(state_holder[0])) != 14)):
+                    break
 
                 code_sentence += ("On " + str(region_code) + " / 27 of the image, ")
             case 1:
@@ -84,12 +88,14 @@ def fsmRunner(codes_deque, img, img_name):
                 merge_img = manip.ThreeApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
 
                 state = 0
+                print(code_sentence)
             case 2:
                 code_sentence += ("print the code sentences.\n")
 
                 merge_img = manip.SentenceApplier(img, region, code_sentence, state_holder, codes_deque.popleft())
 
                 state = 0
+                print(code_sentence)
             case 3:
                 code_sentence += ("print a snipet of the python code.\n")
 
@@ -102,20 +108,66 @@ def fsmRunner(codes_deque, img, img_name):
                 merge_img = manip.PythonApplier(img, region, state_holder, codes_deque.popleft(), file)
 
                 state = 0
-            case 4:
-                code_sentence += ("randomly sort the pixels.\n")
-                state = 0
+                print(code_sentence)
             case 5:
-                code_sentence += ("sort the pixels.\n")
+                if (len(codes_deque) == 0):
+                    break
+
+                sort_code = base3(state_holder[0]) + 1
+
+                sort_mode = "lightness"
+                if(sort_code == 20):
+                    sort_mode = "hue"
+                elif(sort_code == 21 or sort_code == 22):
+                    sort_mode = "saturation"
+                elif(sort_code == 23 or sort_code == 24):
+                    sort_mode = "intensity"
+                elif(sort_code == 25 or sort_code == 26):
+                    sort_mode = "minimum"
+
+
+                properties = codes_deque.popleft()
+                #determines the degree the pixels should be sorted at based on the first digit of the property code
+                degree = 0
+                if(properties[0][0] == 1):
+                    degree = 45
+                elif(properties[0][0] == 2):
+                    degree = 90
+
+    
+                #determines percentage of color threshold to be sorted, out of 1.  Based on the third digit of the property code
+                percent = .5
+                if(properties[0][1] == 1):
+                    percent = .75
+                elif(properties[0][1] == 2):
+                    percent = 1.0
+
+
+                #determines the upper and lower bounds of the threshold, based on the second digit of the property code.  Pixels that fit within the bounds of the threshold get sorted.
+                lower_bound = 0
+                upper_bound = percent
+                if(properties[0][2] == 1):
+                    lower_bound = (1 - percent) / 2
+                    upper_bound = (1 - percent) / 2 + percent
+                elif(properties[0][2] == 2):
+                    lower_bound = 1 - percent
+                    upper_bound = 1
+
+
+                code_sentence += ("sort the pixels by " + sort_mode + " within the bounds (" + str(lower_bound) + ", " + str(upper_bound) + "), sorting in direction " + str(degree) + " degrees.\n")
                 
-                merge_img = manip.PixelSorter(img, region, state_holder, codes_deque.popleft())
+
+                merge_img = manip.PixelSorter(img, region, sort_mode, lower_bound, upper_bound, degree)
+
 
                 state = 0
+                print(code_sentence)
             case 6:
                 code_sentence += ("print the hexadecimal data.\n")
                 merge_img = manip.HexApplier(img, region, state_holder, codes_deque.popleft(), img_name)
 
                 state = 0
+                print(code_sentence)
             case 7:
                 code_sentence += ("threshold the image (color).\n")
                 if (len(codes_deque) == 0):
@@ -133,6 +185,7 @@ def fsmRunner(codes_deque, img, img_name):
                 thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
                 merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value, False)
                 state = 0
+                print(code_sentence)
             case 8:
                 code_sentence += ("threshold the image (grayscale).\n")
                 if (len(codes_deque) == 0):
@@ -149,9 +202,11 @@ def fsmRunner(codes_deque, img, img_name):
                 thresh_value = int((thresh_code[1] + thresh_code[2]) / 9 * 100) + 100
                 merge_img = manip.ThreshApplier(img, region, thresh_type, thresh_value, True)
                 state = 0
+                print(code_sentence)
             case 9:
                 code_sentence += ("create a fractal pattern.\n")
                 state = 0
+                print(code_sentence)
             case 10:
                 code_sentence += ("print a statement.\n")
                 merge_img = manip.PrintApplier(img, region, state_holder, codes_deque.popleft(), codes_deque)
@@ -162,13 +217,19 @@ def fsmRunner(codes_deque, img, img_name):
                         break
 
                 state = 0
+                print(code_sentence)
+
             case 11:
                 code_sentence += ("apply Canny Edge Detection.\n")
                 merge_img = manip.CannyApplier(img, region)
                 state = 0
+                print(code_sentence)
+
             case -1:
                 code_sentence += ("skip section.\n")
                 state = 0
+                print(code_sentence)
+
     print(code_sentence)
     return merge_img
             

@@ -18,7 +18,7 @@ def CannyApplier(img, region):
     pixel_height = fsm.FractionToRegion(height, region_code)
 
     #defines a subregion, and cannies it
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
     canny_region = cv2.Canny(subregion, threshold1 = 100, threshold2 = 200)
     canny_region = cv2.cvtColor(canny_region, cv2.COLOR_GRAY2RGB)
 
@@ -33,18 +33,14 @@ def ThreshApplier(img, region, thresh_type, thresh_value, grey):
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
 
+    grey_img = img
     #defines a region, grayscales the image if necessary, then thresholds it
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
-
     if grey == True:
-        subregion = cv2.cvtColor(subregion, cv2.COLOR_RGB2GRAY)
-        subregion = cv2.cvtColor(subregion, cv2.COLOR_GRAY2RGB)
+        grey_img = cv2.cvtColor(grey_img, cv2.COLOR_RGB2GRAY)
+        grey_img = cv2.cvtColor(grey_img, cv2.COLOR_GRAY2RGB)
 
-    thresh_region = cv2.threshold(subregion, thresh_value, 255, thresh_type)[1]
-
-
-
-
+    thresh_region = cv2.threshold(grey_img, thresh_value, 255, thresh_type)[1]
+   
     return ImageMerger(img, thresh_region, width, pixel_height, region[1])
 
 
@@ -55,7 +51,7 @@ def ThreeApplier(img, region, state_holder, properties, codes_deque):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
 
     text_properties = GetTextProperties(properties[0], subregion, width)
     
@@ -78,7 +74,7 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
 
     sentence = sentence.replace("\n", "")
 
@@ -118,7 +114,7 @@ def PrintApplier(img, region, state_holder, properties, codes_deque):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
     
 
@@ -144,7 +140,7 @@ def PythonApplier(img, region, state_holder, properties, file):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
 
     lines = py.read().split("\n")
@@ -173,7 +169,7 @@ def HexApplier(img, region, state_holder, properties, file):
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
 
 
@@ -199,51 +195,21 @@ def HexApplier(img, region, state_holder, properties, file):
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
 
-def PixelSorter(img, region, state_holder, properties):
+def PixelSorter(img, region, sort_mode, lower_bound, upper_bound, degree):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
     region_code = fsm.RegionCodeGetter(region)
     pixel_height = fsm.FractionToRegion(height, region_code)
-    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+    subregion = img
 
-
-    #determines the degree the pixels should be sorted at based on the first digit of the property code
-    degree = 0
-    if(properties[0][0] == 1):
-        degree = 45
-    elif(properties[0][0] == 2):
-        degree = 90
 
     
-    #determines percentage of color threshold to be sorted, out of 1.  Based on the third digit of the property code
-    percent = .5
-    if(properties[0][1] == 1):
-        degree = .75
-    elif(properties[0][1] == 2):
-        degree = 1.0
-
-
-    #determines the upper and lower bounds of the threshold, based on the second digit of the property code.
-    lower_bound = 0
-    upper_bound = percent
-    if(properties[0][2] == 1):
-        lower_bound = (1 - percent) / 2
-        upper_bound = (1 - percent) / 2 + percent
-    elif(properties[0][2] == 2):
-        lower_bound = 1 - percent
-        upper_bound = 1
-
     #takes an image, sorts the pixels, and converts it back into cv2 format
     im_pil = Image.fromarray(img)
-    im_pil = pixelsort(im_pil, None, None, 0, 20, "minimum", "threshold", lower_bound, upper_bound, degree)
+    im_pil = pixelsort(im_pil, None, None, 0, 20, sort_mode, "threshold", lower_bound, upper_bound, degree)
     subregion = cv2.cvtColor(np.asarray(im_pil), cv2.COLOR_RGBA2RGB)
     
-
-
-    cv2.imshow("img", subregion)
-    cv2.waitKey(0)
-
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
 
@@ -327,6 +293,3 @@ def OffsetPicker(digit, text, font, font_size, width, codel, vert_offset):
     vertical_offset = codel * codel_height - int((text_bounds[1]) * 0.5) + vert_offset
 
     return (horizontal_offset, vertical_offset)
-
-#applies text to an image
-#def TextApplier(img):
