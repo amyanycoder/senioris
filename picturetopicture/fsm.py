@@ -49,14 +49,14 @@ def fsmRunner(codes_deque, img, img_name):
         (1,2,0): 10,
         (1,2,1): 10,
         (1,2,2): 10,
-        (2,0,0): 4,
+        (2,0,0): 5,
         (2,0,1): 5,
         (2,0,2): 5,
-        (2,1,0): 9,
-        (2,1,1): 9,
-        (2,1,2): 9,
-        (2,2,0): 9,
-        (2,2,1): 9,
+        (2,1,0): 5,
+        (2,1,1): 5,
+        (2,1,2): 5,
+        (2,2,0): 5,
+        (2,2,1): 5,
         (2,2,2): -1
 
     }
@@ -107,6 +107,9 @@ def fsmRunner(codes_deque, img, img_name):
                 state = 0
             case 5:
                 code_sentence += ("sort the pixels.\n")
+                
+                merge_img = manip.PixelSorter(img, region, state_holder, codes_deque.popleft())
+
                 state = 0
             case 6:
                 code_sentence += ("print the hexadecimal data.\n")

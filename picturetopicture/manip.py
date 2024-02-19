@@ -2,6 +2,11 @@ from collections import deque
 import textwrap
 import cv2
 import fsm
+from py_algorithms.sort import new_merge_sort
+from pixelsort import pixelsort
+from PIL import Image
+import sys
+import numpy as np
 
 codel_height = 200
 
@@ -192,6 +197,55 @@ def HexApplier(img, region, state_holder, properties, file):
     py.close()
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
+
+
+def PixelSorter(img, region, state_holder, properties):
+    height, width, channels = img.shape
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img[region[1]*codel_height:pixel_height, 0:width]
+
+
+    #determines the degree the pixels should be sorted at based on the first digit of the property code
+    degree = 0
+    if(properties[0][0] == 1):
+        degree = 45
+    elif(properties[0][0] == 2):
+        degree = 90
+
+    
+    #determines percentage of color threshold to be sorted, out of 1.  Based on the third digit of the property code
+    percent = .5
+    if(properties[0][1] == 1):
+        degree = .75
+    elif(properties[0][1] == 2):
+        degree = 1.0
+
+
+    #determines the upper and lower bounds of the threshold, based on the second digit of the property code.
+    lower_bound = 0
+    upper_bound = percent
+    if(properties[0][2] == 1):
+        lower_bound = (1 - percent) / 2
+        upper_bound = (1 - percent) / 2 + percent
+    elif(properties[0][2] == 2):
+        lower_bound = 1 - percent
+        upper_bound = 1
+
+    #takes an image, sorts the pixels, and converts it back into cv2 format
+    im_pil = Image.fromarray(img)
+    im_pil = pixelsort(im_pil, None, None, 0, 20, "minimum", "threshold", lower_bound, upper_bound, degree)
+    subregion = cv2.cvtColor(np.asarray(im_pil), cv2.COLOR_RGBA2RGB)
+    
+
+
+    cv2.imshow("img", subregion)
+    cv2.waitKey(0)
+
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
+
 
 
 #returns font, font_size, and color in a tuple
