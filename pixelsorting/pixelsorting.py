@@ -29,7 +29,7 @@ def main():
 
     im_pil = Image.fromarray(img)
 
-    im_pil = pixelsort(im_pil, None, None, 0, 20, "minimum", "threshold", 0.25, 0.75, 45)
+    im_pil = pixelsort(im_pil, None, None, 0, 20, "lightness", "threshold", 0, .9, 0)
     im_np = np.asarray(im_pil)
     
 

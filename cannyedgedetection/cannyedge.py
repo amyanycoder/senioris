@@ -134,6 +134,7 @@ cv2.waitKey(0)
 edges = cv2.Canny(resize_img, threshold1 = 100, threshold2 = 200)
 cv2.imshow("canny", edges)
 cv2.waitKey(0)
+cv2.imwrite("output.jpg", edges)
 
 #cuts image into codels
 i = 0

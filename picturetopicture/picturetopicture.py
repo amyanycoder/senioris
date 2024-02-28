@@ -93,21 +93,24 @@ def assembleCodesDeque(left_list, total_list, right_list, threshold_left, thresh
     return codes_deque
 
 def main():
-    default_img = "barbiecrop.png"
+    file_path = "barbiecrop.png"
     if __name__ == "__main__":
         if(len(sys.argv) < 2):
             print("No image specified.  Using default image file.")
-            img = cv2.imread(default_img, cv2.IMREAD_ANYCOLOR)
+            img = cv2.imread(file_path, cv2.IMREAD_ANYCOLOR)
         elif(len(sys.argv) == 2):
             img = cv2.imread(sys.argv[1], cv2.IMREAD_ANYCOLOR)
+
+            file_path = sys.argv[1]
         else:
             print("Too many arguments.  Using default image file.")
-            img = cv2.imread(default_img, cv2.IMREAD_ANYCOLOR)
+            img = cv2.imread(file_path, cv2.IMREAD_ANYCOLOR)
+
 
     height, width, channels = img.shape
 
     #performs canny edge detection on image and displays result 
-    edges = cv2.Canny(img, threshold1 = 100, threshold2 = 200)
+    edges = cv2.Canny(img, threshold1 = 200, threshold2 = 250)
     cv2.imshow("canny", edges)
     cv2.waitKey(0)
 
@@ -130,7 +133,7 @@ def main():
     codes_deque = assembleCodesDeque(left_values, edgepercodel, right_values, width * 0.1, (width * codel_height) / 100, width * 0.1)
 
     print(codes_deque)
-    final_img = fsmRunner(codes_deque, img, sys.argv[1])
+    final_img = fsmRunner(codes_deque, img, file_path)
     cv2.imshow("Final Image", final_img)
     cv2.waitKey(0)
     cv2.imwrite("output.jpg", final_img)

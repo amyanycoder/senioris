@@ -63,7 +63,7 @@ def ThreeApplier(img, region, state_holder, properties, codes_deque):
     
     #prints all other codes remaining in the deque.
     for x in codes_deque:
-        subregion = cv2.putText(subregion, fsm.codeToString(x[0]), OffsetPicker(state_holder[0][2], x[0], text_properties[0], text_properties[2], width, x[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
+        subregion = cv2.putText(subregion, fsm.codeToString(x[0]), OffsetPicker(state_holder[0][2], x[0], text_properties[0], text_properties[2], width, x[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1], int(text_properties[2]))
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
@@ -102,7 +102,8 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
     i = 0
     while len(lines_deque) > 0:
         current = lines_deque.popleft()
-        subregion = cv2.putText(subregion, current, OffsetPicker(state_holder[0][2], current, text_properties[0], text_properties[2], width, region[1] + 1, i * text_height + i * int(text_height * .2)), text_properties[0], text_properties[2], text_properties[1])
+        print(int(text_properties[2]))
+        subregion = cv2.putText(subregion, current, OffsetPicker(state_holder[0][2], current, text_properties[0], text_properties[2], width, region[1] + 1, i * text_height + i * int(text_height * .2) + int(0.01 * width)), text_properties[0], text_properties[2], text_properties[1], int(text_properties[2]))
         i += 1
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
@@ -127,7 +128,7 @@ def PrintApplier(img, region, state_holder, properties, codes_deque):
         char = chr(fsm.base3(x[0]) + 64)
         statement += char
 
-    subregion = cv2.putText(subregion, statement, OffsetPicker(state_holder[0][2], statement, text_properties[0], text_properties[2], width, 0, 100), text_properties[0], text_properties[2], text_properties[1])
+    subregion = cv2.putText(subregion, statement, OffsetPicker(state_holder[0][2], statement, text_properties[0], text_properties[2], width, 0, int(0.1 * width)), text_properties[0], text_properties[2], text_properties[1], int(text_properties[2]))
 
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
@@ -154,7 +155,7 @@ def PythonApplier(img, region, state_holder, properties, file):
 
 
     for x in lines:
-        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1])
+        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1], int(text_properties[2]))
 
     py.close()
 
@@ -185,10 +186,8 @@ def HexApplier(img, region, state_holder, properties, file):
 
     (text_width, text_height), _ = cv2.getTextSize(lines[0], text_properties[0], text_properties[2], 1)
 
-    print(lines[0])
-
     for x in lines:
-        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1])
+        subregion = cv2.putText(subregion, x, (0, int(lines.index(x) * text_height * 1.25)), cv2.FONT_HERSHEY_SIMPLEX, text_properties[2], text_properties[1], int(text_properties[2]))
 
     py.close()
 
@@ -212,6 +211,16 @@ def PixelSorter(img, region, sort_mode, lower_bound, upper_bound, degree):
     
     return ImageMerger(img, subregion, width, pixel_height, region[1])
 
+
+def Skip(img, region):
+    height, width, channels = img.shape
+
+    #the percentage of the image to have text added on top, rounded to the nearest pixel
+    region_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, region_code)
+    subregion = img
+    
+    return ImageMerger(img, subregion, width, pixel_height, region[1])
 
 
 #returns font, font_size, and color in a tuple

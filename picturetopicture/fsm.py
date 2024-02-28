@@ -97,7 +97,7 @@ def fsmRunner(codes_deque, img, img_name):
                 state = 0
                 print(code_sentence)
             case 3:
-                code_sentence += ("print a snipet of the python code.\n")
+                code_sentence += ("print a snipet of the compiler code.\n")
 
                 file = "manip.py"
                 if(state_holder[0][2] == 0):
@@ -227,6 +227,7 @@ def fsmRunner(codes_deque, img, img_name):
 
             case -1:
                 code_sentence += ("skip section.\n")
+                merge_img = manip.Skip(img, region)
                 state = 0
                 print(code_sentence)
 
