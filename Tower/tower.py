@@ -6,7 +6,7 @@ import random
 from collections import deque
 from fsm import fsmRunner
 
-img = cv2.imread("patch.jpg", cv2.IMREAD_ANYCOLOR)
+img = cv2.imread("examples\girl.jpg", cv2.IMREAD_ANYCOLOR)
 codel_height = 200
 
 '''

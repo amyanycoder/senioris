@@ -25,8 +25,8 @@ Returns: Image, an output image that has been modified with Canny
 def CannyApplier(img, region):
     height, width, channels = img.shape
     #the percentage of the image to be cannied, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
 
     #defines a subregion, and cannies it
     subregion = img
@@ -55,8 +55,8 @@ def ThreshApplier(img, region, thresh_type, thresh_value, grey):
 
 
     #the percentage of the image to be thresholded, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
 
     grey_img = img
     #defines a region, grayscales the image if necessary, then thresholds it
@@ -88,14 +88,14 @@ def Base3Applier(img, region, state_holder, properties, codes_deque):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
 
     text_properties = GetTextProperties(properties[0], subregion, width)
     
 
-    #prints the three essential codes for this statement:  The region code, the function code, and the properties code.
+    #prints the three essential codes for this statement:  The scale code, the function code, and the properties code.
     subregion = cv2.putText(subregion, fsm.codeToString(region[0]), OffsetPicker(state_holder[0][2], region[0], text_properties[0], text_properties[2], width, region[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
     subregion = cv2.putText(subregion, fsm.codeToString(state_holder[0]), OffsetPicker(state_holder[0][2], state_holder[0], text_properties[0], text_properties[2], width, state_holder[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
     subregion = cv2.putText(subregion, fsm.codeToString(properties[0]), OffsetPicker(state_holder[0][2], properties[0], text_properties[0], text_properties[2], width, properties[1] + 1, 0), text_properties[0], text_properties[2], text_properties[1])
@@ -125,8 +125,8 @@ def SentenceApplier(img, region, sentence, state_holder, properties):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
 
     sentence = sentence.replace("\n", "")
@@ -178,8 +178,8 @@ def PrintApplier(img, region, state_holder, properties, codes_deque):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
     #defines the mode of capitalization:  0 for all lowercase, 1 for all caps, 2 for capitalized
@@ -226,8 +226,8 @@ def PythonApplier(img, region, properties, file):
     py = open(file, "r")
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
 
@@ -269,8 +269,8 @@ def HexaApplier(img, region, state_holder, properties, file):
     py = open(file, "rb")
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
     text_properties = GetTextProperties(properties[0], subregion, width)
 
@@ -315,8 +315,8 @@ def SortApplier(img, region, sort_mode, lower_bound, upper_bound, degree):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
 
     #takes an image, sorts the pixels, and converts it back into cv2 format
@@ -342,8 +342,8 @@ def SkipApplier(img, region):
     height, width, channels = img.shape
 
     #the percentage of the image to have text added on top, rounded to the nearest pixel
-    region_code = fsm.RegionCodeGetter(region)
-    pixel_height = fsm.FractionToRegion(height, region_code)
+    scale_code = fsm.RegionCodeGetter(region)
+    pixel_height = fsm.FractionToRegion(height, scale_code)
     subregion = img
     
     return ImageMerger(img, subregion, width, pixel_height, region[1])
@@ -462,6 +462,15 @@ OffsetPicker
 Sets an offset for the text, setting a consistent offset vertically and a left, center, or right orientation based on the function code.
 
 Properties:
+digit:          int, base 3 digit that corresponds to a specific font size
+text:           String, the text to be printed on the image
+font:           Enum, font of the text
+font_size:      float, value by which to scale the text
+width:          int, width of the image in pixels
+codel:          int, the number of the codel's position, measured in codels from the top
+vert_offset:    int, measures the offset of the text from the top of the codel it is in.  0 in all functions except Base3.
+
+Returns: float, an offset from the top of the image to begin printing text.
 '''
 def OffsetPicker(digit, text, font, font_size, width, codel, vert_offset):
     text_bounds, baseline = cv2.getTextSize((str(text)), font, font_size, 1)

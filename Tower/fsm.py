@@ -76,15 +76,15 @@ def fsmRunner(codes_deque, img, img_name):
     while True:
         #chooses a Tower function based on the state of init_dict
         match state:
-            #initial state.  Draws a region code and function code from the deque and goes to that function's state
+            #initial state.  Draws a scale code and function code from the deque and goes to that function's state
             case 0:
                 #checks if there are any codes in the queue before pulling from it
                 if(len(codes_deque) == 0):
                     break
 
-                #finds the region code for the statement.
+                #finds the scale code for the statement.
                 region = codes_deque.popleft()
-                region_code = RegionCodeGetter(region) + 1
+                scale_code = RegionCodeGetter(region) + 1
                 #keeps running through the fsm as long as there are codes still in the deque.
                 if codes_deque:
                     state_holder = codes_deque.popleft()
@@ -96,7 +96,7 @@ def fsmRunner(codes_deque, img, img_name):
                 if(len(codes_deque) == 0 and (base3(state_holder[0]) != 26 and (base3(state_holder[0])) != 14)):
                     break
 
-                code_sentence += ("On " + str(region_code) + " / 27 of the image, ")
+                code_sentence += ("On " + str(scale_code) + " / 27 of the image, ")
             #State for Base3
             case 1:
                 print("Running Base3 function...")
@@ -261,26 +261,26 @@ def fsmRunner(codes_deque, img, img_name):
 '''
 FractionToRegion
 
-Converts the region code from a fraction of a total image into an absolute number of rows to affect 
+Converts the scale code from a fraction of a total image into an absolute number of rows to affect 
 
 Parameters:
 height:         int, height of the image
-region_code:    int, a fraction (out of 27) of the image to affect.  The statement's region code.
+scale_code:    int, a fraction (out of 27) of the image to affect.  The statement's scale code.
 
 Returns: int, An absolute number of rows for the function to affect
 
 '''
-def FractionToRegion(height, region_code):
-    return int(height * round(region_code / 27, 2))
+def FractionToRegion(height, scale_code):
+    return int(height * round(scale_code / 27, 2))
 
 
 '''
 RegionCodeGetter
 
 Parameters:
-region: tuple, the region code in base 3 format
+region: tuple, the scale code in base 3 format
 
-Returns: an integer representation of the base 3 tuple region code.
+Returns: an integer representation of the base 3 tuple scale code.
 
 '''
 def RegionCodeGetter(region):
